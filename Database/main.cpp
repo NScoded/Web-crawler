@@ -1,64 +1,47 @@
+#include "include/Database.h"
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <memory>
-
-#include <mysql_driver.h>
-#include <mysql_connection.h>
-
-#include <cppconn/prepared_statement.h>
-
-using namespace std;
+#include <string>
 
 int main()
 {
-    try
+    Database database;
+
+    if (!database.connect("crawler.db"))
+        return 1;
+
+    if (!database.createTable())
+        return 1;
+
+    // Open HTML file
+    std::ifstream file("../page.html");
+
+    if (!file)
     {
-        auto driver =
-            sql::mysql::get_mysql_driver_instance();
-
-        unique_ptr<sql::Connection> conn(
-            driver->connect(
-                "tcp://127.0.0.1:3306",
-                "root",
-                "YOUR_PASSWORD"
-            )
-        );
-
-        conn->setSchema("crawler_db");
-
-        ifstream file("page.html");
-
-        stringstream ss;
-
-        ss << file.rdbuf();
-
-        string html = ss.str();
-
-        auto pstmt =
-            unique_ptr<sql::PreparedStatement>(
-                conn->prepareStatement(
-                    "INSERT INTO pages(url,html_content) VALUES(?,?)"
-                )
-            );
-
-        pstmt->setString(
-            1,
-            "https://example.com"
-        );
-
-        pstmt->setString(
-            2,
-            html
-        );
-
-        pstmt->execute();
-
-        cout << "Inserted Successfully\n";
+        std::cout << "File not found!\n";
+        return 1;
     }
 
-    catch(sql::SQLException &e)
+    // Read complete file
+    std::stringstream ss;
+    ss << file.rdbuf();
+
+    std::string html = ss.str();
+
+    std::cout << "HTML Length : " << html.length() << '\n';
+
+    if (database.insertPage("https://nileshsahu.in", html))
     {
-        cout << e.what() << endl;
+        std::cout << "Insert Successful\n";
     }
+    else
+    {
+        std::cout << "Insert Failed\n";
+    }
+
+    database.close();
+
+    return 0;
 }

@@ -4,14 +4,19 @@ project(Crawler)
 
 set(CMAKE_CXX_STANDARD 17)
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(SQLITE3 REQUIRED sqlite3)
+
 include_directories(
-"C:/Program Files/MySQL/MySQL Connector C++ 9.7/include/jdbc"
+    include
+    ${SQLITE3_INCLUDE_DIRS}
 )
 
-link_directories(
-"C:/Program Files/MySQL/MySQL Connector C++ 9.7/lib64/vs14"
+add_executable(Crawler
+    main.cpp
+    src/Database.cpp
 )
 
-add_executable(Crawler main.cpp)
-
-target_link_libraries(Crawler mysqlcppconn)
+target_link_libraries(Crawler
+    ${SQLITE3_LIBRARIES}
+)

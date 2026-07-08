@@ -1,6 +1,8 @@
 # ninja log v7
-8	535	8051933538053732	build.ninja	e54a59cddb91f2eb
-8	535	8051933537684618	D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/Database/build/cmake_install.cmake	e54a59cddb91f2eb
-28	1440	8051926648399486	CMakeFiles/Crawler.dir/main.cpp.obj	ec896313da65803e
-23	1097	8051933538053732	build.ninja	e54a59cddb91f2eb
-23	1097	8051933538053732	D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/Database/build/cmake_install.cmake	e54a59cddb91f2eb
+31	938	8052003026453330	CMakeFiles/Crawler.dir/src/Database.cpp.obj	58e5fb79cc6b3844
+6	1020	8052003026213204	CMakeFiles/Crawler.dir/main.cpp.obj	efe2b26fe09ba832
+1020	1297	8052003036352586	Crawler.exe	f8440fec5615bbba
+51	1286	8052038896379684	CMakeFiles/Crawler.dir/main.cpp.obj	efe2b26fe09ba832
+1287	1744	8052038908742766	Crawler.exe	f8440fec5615bbba
+11	964	8052039450148871	CMakeFiles/Crawler.dir/main.cpp.obj	efe2b26fe09ba832
+966	1201	8052039459702359	Crawler.exe	f8440fec5615bbba
