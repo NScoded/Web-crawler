@@ -17,8 +17,4 @@ int main(){
     queue.push(2);
     queue.push(3);
     
-    
-    
-    
-    
 }

@@ -9,6 +9,8 @@ The Web Crawler recursively visits web pages starting from a seed URL, downloads
 # Section 1 - Public API
 
 The crawler is divided into independent modules to improve maintainability and allow future extensions without modifying the overall architecture.
+1. Crawler
+2. 
 
 ```cpp
 
