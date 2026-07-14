@@ -4,6 +4,7 @@ project(cdp_scraper)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(Threads REQUIRED)
 find_package(ixwebsocket REQUIRED)
 find_package(CURL REQUIRED)
 find_package(nlohmann_json REQUIRED)
@@ -18,6 +19,7 @@ target_link_libraries(cdp_scraper
         ixwebsocket::ixwebsocket
         CURL::libcurl
         nlohmann_json::nlohmann_json
+        Threads::Threads
 )
 
 # Agar iss library ko kisi doosre project/target mein use karna ho, to bas

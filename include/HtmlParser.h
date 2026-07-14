@@ -6,9 +6,8 @@ class HtmlParser{
     private:
     DynamicArray<string>links;
     public:
-    size_t parseHttp(string part);
-    size_t parseHref(string part);
-    DynamicArray<string>parseHtml(string html);
+    size_t parseHttp(const string &html, size_t start);
+    size_t parseHref(const string &html, size_t start);
+    DynamicArray<string>parseHtml(const string &html);
 
 };
-

@@ -228,12 +228,12 @@ LinkedList<T>::remove(int index){
     }
     
     if(index==0){
-        if(head==tail){
-            tail=nullptr;
-        }
         Node *temp=head;
         head=head->next;
-        delete head;
+        if(head==nullptr){
+            tail=nullptr;
+        }
+        delete temp;
         size--;
         return;
     }

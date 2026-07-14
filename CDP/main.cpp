@@ -11,8 +11,11 @@
 
 int main() {
     try {
-        // Chrome ek hi baar launch hoga (constructor mein).
-        CDPScraper scraper("C:/Program Files/Google/Chrome/Application/chrome.exe", "9222", 3);
+        // Chrome ek hi baar launch hoga (constructor mein), aur ek 4-tabs
+        // ka pool bhi bann jayega (parallel fetch ke liye). Windows par
+        // chrome ka path pehle jaisa hi pass kar sakte ho:
+        // CDPScraper("C:/Program Files/Google/Chrome/Application/chrome.exe");
+        CDPScraper scraper;
 
         // Pehla link
         std::string html1 = scraper.getHtml("https://en.wikipedia.org/wiki/Computer");

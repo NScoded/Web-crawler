@@ -3,55 +3,62 @@
 Crawler::Crawler(){
     depth=2;
     normalizer.seedLink="empty";
-
 }
-void Crawler::crawl(string seed,int deep=0){
-    cout<<"Function calling "<<deep<<endl;
-    if(deep>depth)return ;
-    cout<<"Deep>depth false"<<endl;
-    cout<<"Before normalise(seed)"<<endl;
-    normalizer.normalize(seed);
-    cout<<"After normalise(seed)"<<endl;
-    if(normalizer.seedLink=="empty"){
-        if(normalizer.isrelative(seed)){
-            cout<<"Source link is invalid or relative"<<endl;
-            return ;
-        }
-        normalizer.seedLink=seed;
-    }
-    cout<<"After if"<<endl;
-    cout << "Checking: " << seed << endl;
 
-    if(visited.exists(seed)){
-        cout << "Already visited \n"<<seed;
+
+void Crawler::crawl(string seed,int deep=0){
+
+    if(normalizer.isrelative(seed)){
+        cout<<"Source link is invalid or relative"<<endl;
         return;
     }
+    normalizer.seedLink = seed;
 
-    cout << "Not visited\n";
-    cout<<"After exists"<<endl;
-    frontier.put(seed,deep);
-    cout<<"Before Fectch"<<endl;
-    string html=fetch.getHtml(seed);
-    visited.insert(seed);
-    cout<<"After Fectch"<<endl;
-    DynamicArray<string>links;
-    links=htmlparser.parseHtml(html);
-    for(int i=0;i<links.size();i++){
-        normalizer.normalize(links[i]);
-        if( !links[i].empty() && !visited.exists(links[i])){
-            frontier.put(links[i],deep+1);
-            cout<<links[i]<<endl;
+    frontier.put(seed, deep);
+
+    while(!frontier.empty()){
+        cout<<"Next Url :"<<frontier.getLink()<<"-> "<<frontier.getDepth()<<endl;
+
+        string link = frontier.getLink();
+        int linkDepth = frontier.getDepth();
+        frontier.pop();
+
+        try{
+            if(linkDepth > depth) continue;
+
+            normalizer.normalize(link);
+            if(link.empty()) continue;
+
+           
+
+            if(visited.exists(link)){
+                cout << "Already visited\n" << link << endl;
+                continue;
+            }
+
+           
+            string html = fetch.getHtml(link);
+            visited.insert(link);
+           
+
+            DynamicArray<string> links = htmlparser.parseHtml(html);
+            for(int i = 0; i < links.size(); i++){
+                normalizer.normalize(links[i]);
+                if(!links[i].empty() && !visited.exists(links[i])){
+                    frontier.put(links[i], linkDepth + 1);
+                    
+                }
+            }
+            cout<<"Total links: "<<links.size()<<endl;
+        }
+        catch(const std::exception& e){
+            std::cout << e.what() << std::endl;
         }
     }
-    frontier.pop();
-    cout<<"Next URl"<<endl;
-    cout<<frontier.getLink()<<" -> "<<frontier.getDepth()<<endl;
-    crawl(frontier.getLink(),frontier.getDepth());
-    return ;
 }
 
 int main(){
     Crawler c;
-    c.crawl("https://nileshsahu.in");
-    
+    c.crawl("https://google.com", 0);
+
 }

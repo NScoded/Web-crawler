@@ -85,13 +85,13 @@ void Normalizer::normalizePath(string &source){
         string extension=content[content.size()-1];
         size_t pos=extension.find('.');
         if(pos!=string::npos){
-            cout<<"Name :"<<extension<<endl;
             extension=extension.substr(pos);
-            cout<<"extension :"<<extension<<endl<<endl;
             if(ignoreExtension.exists(extension)){
+               
                 source="";
                 return ;
             }
+            
         }
     }
     string result="/";

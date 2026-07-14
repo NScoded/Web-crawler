@@ -1,4 +1,4 @@
-# Install script for directory: D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/New_CDP
+# Install script for directory: D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/CDP
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,7 +40,7 @@ endif()
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/New_CDP/build/install_local_manifest.txt"
+  file(WRITE "D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/CDP/build/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
 if(CMAKE_INSTALL_COMPONENT)
@@ -56,6 +56,6 @@ else()
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/New_CDP/build/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/CDP/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
