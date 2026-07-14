@@ -6,7 +6,7 @@
 # It is included in the main 'build.ninja'.
 
 # =============================================================================
-# Project: Crawler
+# Project: WebCrawler
 # Configurations: 
 # =============================================================================
 # =============================================================================
@@ -42,7 +42,7 @@ rule CUSTOM_COMMAND
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = C:\msys64\ucrt64\bin\cmake.exe --regenerate-during-build -S"D:\CodeQuotient\Project\Project 2 - Crawler\Web_crawler\Database" -B"D:\CodeQuotient\Project\Project 2 - Crawler\Web_crawler\database\build"
+  command = C:\msys64\ucrt64\bin\cmake.exe --regenerate-during-build -S"D:\CodeQuotient\Project\Project 2 - Crawler\Web_crawler\Database" -B"D:\CodeQuotient\Project\Project 2 - Crawler\Web_crawler\Database\build"
   description = Re-running CMake...
   generator = 1
 

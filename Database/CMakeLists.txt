@@ -1,22 +1,25 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(Crawler)
+project(WebCrawler)
 
 set(CMAKE_CXX_STANDARD 17)
-
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(SQLITE3 REQUIRED sqlite3)
-
-include_directories(
-    include
-    ${SQLITE3_INCLUDE_DIRS}
-)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(Crawler
-    main.cpp
-    src/Database.cpp
+    Database.cpp
 )
 
-target_link_libraries(Crawler
-    ${SQLITE3_LIBRARIES}
+# MySQL include path
+target_include_directories(Crawler PRIVATE
+    "C:/Program Files/MySQL/MySQL Server 8.0/include"
+)
+
+# MySQL library path
+target_link_directories(Crawler PRIVATE
+    "C:/Program Files/MySQL/MySQL Server 8.0/lib"
+)
+
+# Link MySQL client library
+target_link_libraries(Crawler PRIVATE
+    libmysql
 )

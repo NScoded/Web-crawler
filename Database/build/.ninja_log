@@ -1,8 +1,11 @@
 # ninja log v7
-31	938	8052003026453330	CMakeFiles/Crawler.dir/src/Database.cpp.obj	58e5fb79cc6b3844
-6	1020	8052003026213204	CMakeFiles/Crawler.dir/main.cpp.obj	efe2b26fe09ba832
-1020	1297	8052003036352586	Crawler.exe	f8440fec5615bbba
-51	1286	8052038896379684	CMakeFiles/Crawler.dir/main.cpp.obj	efe2b26fe09ba832
-1287	1744	8052038908742766	Crawler.exe	f8440fec5615bbba
-11	964	8052039450148871	CMakeFiles/Crawler.dir/main.cpp.obj	efe2b26fe09ba832
-966	1201	8052039459702359	Crawler.exe	f8440fec5615bbba
+7	3017	8057350286397234	CMakeFiles/Crawler.dir/Database.cpp.obj	9e101b5bd9832df9
+3026	3562	8057350316579668	Crawler.exe	df0e9d9a770aa973
+20	4611	8057351961777767	CMakeFiles/Crawler.dir/Database.cpp.obj	9e101b5bd9832df9
+4617	5204	8057352007757727	Crawler.exe	df0e9d9a770aa973
+9	3235	8057353704999406	CMakeFiles/Crawler.dir/Database.cpp.obj	9e101b5bd9832df9
+3236	3629	8057353737270003	Crawler.exe	df0e9d9a770aa973
+20	3374	8057359002374191	CMakeFiles/Crawler.dir/Database.cpp.obj	9e101b5bd9832df9
+3376	3930	8057359035951930	Crawler.exe	df0e9d9a770aa973
+10	2290	8057379691880953	CMakeFiles/Crawler.dir/Database.cpp.obj	9e101b5bd9832df9
+2291	2620	8057379714692239	Crawler.exe	df0e9d9a770aa973
