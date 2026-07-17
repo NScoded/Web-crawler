@@ -14,29 +14,35 @@ The crawler is implemented in C++ using custom data structures such as `Queue`, 
 
 # Section 1 - Public API
 
-The crawler is divided into independent modules to improve maintainability and allow future extensions without modifying the overall architecture.
+The crawler is organized into independent modules, where each component is responsible for a specific task in the crawling pipeline. This modular architecture improves maintainability, simplifies testing, and allows future enhancements without affecting the overall system.
+
+---
 
 ## Crawler
 
 ```cpp
-class Crawler
 class Crawler{
-    private:
+private:
     int depth;
+    void loop(std::string url,
+              std::string seedHtml,
+              int seedId);
+
+    Set<std::string> visited;
     Frontier frontier;
     Normalizer normalizer;
     CDPScraper fetch;
     HtmlParser htmlparser;
-    Database database;
+    PageStorage pages;
 
-    public:
+public:
     Crawler();
-    void crawl(string seed,int deep);
-
+    void Continue();
+    void crawl(std::string seed, int deep);
 };
 ```
 
-Coordinates the complete crawling process by downloading pages, parsing links, managing the frontier, and storing downloaded pages.
+The `Crawler` class coordinates the complete crawling process. It downloads webpages, normalizes URLs, extracts hyperlinks, manages the crawling frontier, stores downloaded pages in the database, and maintains a visited set to avoid duplicate crawling. It also supports resuming interrupted crawling sessions through the `Continue()` function.
 
 ---
 
@@ -46,103 +52,229 @@ Coordinates the complete crawling process by downloading pages, parsing links, m
 class Frontier{
 
     struct URL{
-        string link;
+        std::string link;
         int depth;
-        string lastCrawl;
     };
-    string getDate();
-    Queue<URL>queue;
-    
-    public:
-    void put(string& link,int depth);
+
+    std::string getDate();
+    Queue<URL> queue;
+    PageStorage pages;
+
+public:
+    void put(std::string& link,
+             int depth,
+             int max,
+             int seedId);
+
+    size_t putSeed(std::string& link,
+                   std::string& html,
+                   int max,
+                   int depth = 0);
+
     URL pop();
     bool empty();
-    string getLink();
+    std::string getLink();
     int getDepth();
+    size_t getSize();
+    void backup();
 };
 ```
 
-Maintains URLs waiting to be crawled using a FIFO queue. Before inserting a URL into the queue, it is normalized to ensure a consistent representation and reduce duplicate URLs caused by different URL formats.
+The `Frontier` maintains URLs waiting to be crawled using a FIFO queue. Along with the in-memory queue, it stores pending URLs in the database, enabling the crawler to recover its state after interruption. The `backup()` function reconstructs the queue from the database during crawl continuation.
 
 ---
 
 ## Downloader
 
 ```cpp
-class CDPScraper
-{
+class CDPScraper{
 public:
-    string getHtml(string url);
+    std::string getHtml(std::string url);
 };
 ```
 
-Uses **Chrome DevTools Protocol (CDP)** to launch a headless Chrome instance, render the webpage, execute JavaScript, and return the fully rendered HTML.
+The downloader uses the **Chrome DevTools Protocol (CDP)** to launch a headless Chrome instance, render JavaScript-driven webpages, and return the fully rendered HTML document.
 
 ---
 
-## HTMLParser
+## HtmlParser
 
 ```cpp
 class HtmlParser{
-    private:
-    DynamicArray<string>links;
-    public:
-    size_t parseHttp(string part);
-    size_t parseHref(string part);
-    DynamicArray<string>parseHtml(string html);
+private:
+    DynamicArray<std::string> links;
 
+public:
+    size_t parseHttp(const std::string& html,
+                     size_t start);
+
+    size_t parseHref(const std::string& html,
+                     size_t start);
+
+    DynamicArray<std::string> parseHtml(
+        const std::string& html);
 };
-
 ```
 
-Extracts hyperlinks from the rendered HTML document.
+The `HtmlParser` extracts hyperlinks from rendered HTML documents. It scans the HTML content, identifies supported URLs, and returns all discovered hyperlinks for further processing.
+
+---
+
+## Normalizer
+
+```cpp
+class Normalizer{
+
+private:
+    std::string read(std::string page);
+    void To_lower(std::string& link);
+    void removeFragment(std::string& link);
+    void normalizePath(std::string& link);
+    void relativeURL(std::string& link);
+
+public:
+    Set<std::string> ignoreExtension;
+    Set<std::string> ignoreDomain;
+    std::string seedLink;
+
+    Normalizer();
+
+    bool isrelative(std::string& source);
+
+    void normalize(std::string& link);
+
+    DynamicArray<std::string> normalize(
+        DynamicArray<std::string>& links);
+};
+```
+
+The `Normalizer` converts URLs into a consistent canonical representation. It resolves relative URLs, removes fragments, converts URLs to lowercase where appropriate, normalizes paths, and filters unwanted domains and file extensions. This minimizes duplicate crawling caused by different textual representations of the same webpage.
 
 ---
 
 ## PageStorage
 
 ```cpp
-class PageStorage
-{
+class PageStorage{
+
 private:
-    Database d;
+    MYSQL* conn;
 
 public:
     PageStorage();
+    ~PageStorage();
 
-    bool storePage(string &url,
-                   string &html,
-                   int depth);
+    // Pages
+    bool storePage(std::string& url,
+                   std::string& html,
+                   int depth,
+                   int seedId);
 
-    bool getPage(string &url,
-                 int &depth,
-                 string &html,
-                 string &lastCrawl);
+    bool getPage(const std::string& url,
+                 int& depth,
+                 std::string& html,
+                 std::string& lastCrawl);
 
-    string getHtml(string &url);
+    std::string getHtml(std::string& url);
+    int getDepth(std::string& url);
+    std::string getLastCrawl(std::string& url);
 
-    int getDepth(string &url);
+    // Frontier
+    bool putFrontier(std::string url,
+                     int depth,
+                     int maxDepth,
+                     int seedId);
 
-    string getLastCrawl(string &url);
+    bool deleteFrontier(std::string url,
+                        int depth);
+
+    void getFrontier(std::string& url,
+                     int& depth);
+
+    bool clearFrontier();
+
+    std::string getLastFrontier(std::string& url,
+                                int& depth,
+                                int& seedId,
+                                int& maxDepth);
+
+    // Seeds
+    size_t putSeeds(std::string& url,
+                    std::string& html,
+                    int& depth,
+                    int& maxDepth);
 };
 ```
 
-Stores rendered webpages in an SQLite database. Each record contains the URL, rendered HTML, and crawling depth. Using SQLite provides persistent storage, allowing downloaded pages to be reused by future modules even after the crawler terminates.
+`PageStorage` provides persistent storage using **MySQL**. It manages three database tables:
+
+* **Pages** – Stores downloaded webpages along with their HTML, depth, and associated Seed ID.
+* **Frontier** – Stores pending URLs so crawling can resume after interruption.
+* **Seeds** – Stores seed URLs and their crawl metadata, including the maximum crawl depth.
+
+The class also provides APIs for inserting, retrieving, updating, and restoring crawler state from the database.
 
 ---
 
-## Design Justification
+## Queue
 
-Instead of placing all functionality inside a single crawler class, responsibilities are divided into dedicated modules.
+```cpp
+template<typename T>
+class Queue{
 
-- `Crawler` coordinates the crawling process.
-- `Downloader` handles webpage rendering using Chrome DevTools Protocol (CDP).
-- `HTMLParser` extracts hyperlinks from rendered HTML.
-- `Frontier` manages URLs waiting to be crawled and normalizes URLs before insertion to maintain a consistent crawling queue.
-- `PageStorage` stores downloaded pages independently from the crawler.
-- `HashMap` prevents duplicate crawling.
+private:
+    LinkedList<T> queue;
 
-The modular design improves readability, testing, and future extensibility. Since browser-specific functionality is isolated inside the `Downloader`, a different rendering engine can be adopted later without modifying the remaining components.
+public:
+    void push(T value);
+    T pop();
+    T front();
+    bool empty();
+    size_t size();
+};
+```
+
+The `Queue` is a custom FIFO container implemented using the custom `LinkedList`. It is used by the `Frontier` to maintain the order in which URLs are processed.
+
+---
+
+## Set
+
+```cpp
+template<typename T>
+class Set{
+
+private:
+    HashMap<T, bool> map;
+
+public:
+    void insert(T value);
+    bool exists(T value);
+    void remove(T value);
+    size_t size();
+    DynamicArray<T> getAll();
+    void clear();
+};
+```
+
+The `Set` is implemented using the custom `HashMap` and provides constant-time average lookup for visited URLs. It prevents duplicate crawling by ensuring that each normalized URL is processed only once.
+
+---
+
+# Design Justification
+
+The crawler follows a modular architecture in which every component has a clearly defined responsibility.
+
+* `Crawler` coordinates the overall crawling workflow.
+* `CDPScraper` downloads fully rendered webpages using Chrome DevTools Protocol.
+* `HtmlParser` extracts hyperlinks from rendered HTML.
+* `Normalizer` converts URLs into a canonical form and filters unsupported links.
+* `Frontier` manages pending crawl tasks while providing persistent recovery support.
+* `PageStorage` maintains persistent crawler state using MySQL.
+* `Queue` manages URL processing order.
+* `Set` prevents duplicate crawling using a hash-based lookup structure.
+
+Separating these responsibilities improves readability, testing, maintainability, and future extensibility. Features such as persistent crawl continuation, alternate storage backends, or different rendering engines can be introduced with minimal impact on the remaining modules.
 
 ---
 
@@ -318,39 +450,85 @@ where:
 
 # Section 5 - Future Compatibility
 
-The crawler is designed using a modular architecture so that future components can be integrated without modifying the core crawling logic. Responsibilities such as page downloading, URL normalization, HTML parsing, and page storage are separated into independent modules, making the system easier to extend, test, and maintain.
+The crawler is designed using a modular architecture in which each component has a clearly defined responsibility. Crawling, URL normalization, HTML parsing, frontier management, and persistent storage are implemented as independent modules. This separation makes the system easier to extend, maintain, and integrate with future components.
 
-The **PageStorage** module acts as an abstraction over the database layer. It stores every crawled webpage in a **MySQL** database together with its URL, rendered HTML, crawl depth, and the last crawl date. Since other modules communicate only through the `PageStorage` interface, the underlying storage implementation can be replaced without affecting the crawler.
+The **PageStorage** module serves as the persistence layer of the crawler. Instead of storing only downloaded pages, it maintains the complete crawler state in a **MySQL** database. The database currently consists of three logical tables:
+
+* **Seeds** – Stores the seed URL, maximum crawl depth, rendered HTML, and crawl metadata.
+* **Pages** – Stores every crawled webpage along with its rendered HTML, crawl depth, last crawl date, and the associated Seed ID.
+* **Frontier** – Stores pending URLs that have not yet been processed, allowing interrupted crawls to resume without losing progress.
+
+Since the crawler interacts only through the `PageStorage` interface, the underlying storage implementation can be replaced without affecting the remaining modules.
 
 The current `PageStorage` interface is shown below.
 
 ```cpp
+// Pages
 bool storePage(std::string &url,
                std::string &html,
-               int depth);
+               int depth,
+               int seedId);
 
-std::string getPage(std::string &url);
+bool getPage(const std::string &url,
+             int &depth,
+             std::string &html,
+             std::string &lastCrawl);
+
+std::string getHtml(std::string &url);
 
 int getDepth(std::string &url);
 
 std::string getLastCrawl(std::string &url);
 
-bool hasPage(std::string &url);
+// Frontier
+bool putFrontier(std::string url,
+                 int depth,
+                 int maxDepth,
+                 int seedId);
+
+bool deleteFrontier(std::string url,
+                    int depth);
+
+void getFrontier(std::string &url,
+                 int &depth);
+
+bool clearFrontier();
+
+std::string getLastFrontier(std::string &url,
+                            int &depth,
+                            int &seedId,
+                            int &maxDepth);
+
+// Seeds
+size_t putSeeds(std::string &url,
+                std::string &html,
+                int &depth,
+                int &maxDepth);
 ```
+
+## Crawl Recovery and Resume Support
+
+Unlike a traditional crawler that stores only downloaded pages, the current implementation also persists the crawling frontier. Every pending URL is stored together with its depth, maximum crawl depth, and associated Seed ID. If the crawler terminates unexpectedly, the pending frontier can be reconstructed from the database and crawling can continue from the exact point where it stopped.
+
+This design significantly improves reliability during long-running crawl operations and eliminates the need to restart the crawl from the original seed URL.
 
 ## Compatibility with the Indexer
 
-The crawler stores fully rendered HTML pages after JavaScript execution using **Chrome DevTools Protocol (CDP)**. As a result, an Indexer can directly consume the stored pages without requiring a browser or JavaScript execution. This enables the Indexer to process both static and dynamic websites using the same interface.
+The crawler stores fully rendered HTML pages obtained through **Chrome DevTools Protocol (CDP)** after JavaScript execution. Consequently, an Indexer can directly consume the stored HTML without launching a browser or executing JavaScript again.
+
+Since every page is associated with its corresponding Seed ID and crawl depth, future indexing modules can organize documents based on crawl sessions, domains, or crawling depth with minimal additional processing.
 
 ## Future Enhancements
 
-The current design allows several future improvements without changing the crawler architecture:
+The current architecture allows several future improvements with minimal changes to the existing codebase:
 
-- Incremental crawling using the `last_crawl` field to avoid downloading recently crawled pages.
-- Configurable recrawling policies based on page freshness.
-- Storage of additional metadata such as HTTP status code, response headers, page title, canonical URL, content type, and crawl duration.
-- Support for alternative storage backends such as SQLite, PostgreSQL, or distributed databases by modifying only the `PageStorage` implementation.
-- Parallel and distributed crawling using multiple worker threads or crawler instances.
-- Integration with indexing, ranking, duplicate page detection, and search modules using the stored webpage database.
+* Incremental crawling using the `last_crawl` timestamp to avoid downloading recently crawled pages.
+* Configurable recrawling policies based on page freshness or crawl frequency.
+* Persistent visited URL storage to support resumable crawling across multiple executions.
+* Storage of additional metadata such as HTTP status code, response headers, page title, canonical URL, content type, page size, and crawl duration.
+* Support for alternative database backends such as SQLite, PostgreSQL, or distributed storage systems by modifying only the `PageStorage` implementation.
+* Parallel and distributed crawling using multiple worker threads or crawler instances sharing the same frontier database.
+* Priority-based frontier scheduling to improve crawl efficiency.
+* Integration with indexing, ranking, duplicate page detection, search, and analytics modules using the persistent webpage database.
 
-The modular design ensures that future components can be added with minimal changes to the existing implementation while maintaining clear separation of responsibilities.
+The modular architecture and persistent storage layer ensure that future features can be integrated with minimal modifications while preserving a clear separation of responsibilities and maintaining the overall design of the crawler.

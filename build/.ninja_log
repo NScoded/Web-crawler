@@ -82,3 +82,16 @@
 14	4289	8059338336841085	CMakeFiles/crawler.dir/src/PageStorage.cpp.obj	212020edaaf548f1
 53	10597	8059338337239153	CMakeFiles/crawler.dir/CDP/CDPScraper.cpp.obj	869186287f0406ab
 10597	11556	8059338442676691	crawler.exe	a95bc1e76419af6b
+338	13231	8059670458340953	CMakeFiles/crawler.dir/CDP/CDPScraper.cpp.obj	869186287f0406ab
+13236	14563	8059670587337734	crawler.exe	a95bc1e76419af6b
+21	5840	8059672578371827	CMakeFiles/crawler.dir/src/Crawler.cpp.obj	986c01f8caeec0d2
+80	9242	8059672578970426	CMakeFiles/crawler.dir/CDP/CDPScraper.cpp.obj	869186287f0406ab
+9242	10284	8059672670588291	crawler.exe	a95bc1e76419af6b
+95	5444	8059827455171842	CMakeFiles/crawler.dir/src/Crawler.cpp.obj	986c01f8caeec0d2
+157	8150	8059827455808794	CMakeFiles/crawler.dir/CDP/CDPScraper.cpp.obj	869186287f0406ab
+8151	8996	8059827535726132	crawler.exe	a95bc1e76419af6b
+61	7017	8059847932265164	CMakeFiles/crawler.dir/src/Crawler.cpp.obj	986c01f8caeec0d2
+121	11574	8059847932855322	CMakeFiles/crawler.dir/CDP/CDPScraper.cpp.obj	869186287f0406ab
+11576	13001	8059848047409755	crawler.exe	a95bc1e76419af6b
+43	7915	8059855162501363	CMakeFiles/crawler.dir/CDP/CDPScraper.cpp.obj	869186287f0406ab
+7918	8575	8059855241248102	crawler.exe	a95bc1e76419af6b

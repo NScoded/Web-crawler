@@ -6,10 +6,11 @@
 #include <curl/curl.h>
 
 #include <chrono>
+#include <cctype>
 #include <cstdlib>
 #include <iostream>
 #include <thread>
-#include <vector>
+
 
 #ifdef _WIN32
 #include <process.h>
@@ -110,6 +111,94 @@ string CDPScraper::httpDelete(const string& url) {
         curl_easy_cleanup(curl);
     }
     return response;
+}
+
+// ==========================================================
+// PART 1.5: Real website ke liye "fast path" - seedha curl
+// ==========================================================
+//
+// httpGet() (upar) sirf Chrome ke localhost debugging API ke liye hai
+// (chhota timeout, redirect follow nahi karta). Real websites ke liye
+// alag settings chahiye - lamba timeout, redirects follow karna,
+// aur ek normal browser jaisa User-Agent (warna bahut saari sites
+// bot samajh kar block/garbage bhej deti hain).
+string CDPScraper::curlFetchPage(const string& url, long timeoutSeconds) {
+    CURL* curl = curl_easy_init();
+    string response;
+    if (!curl) return response;
+
+    long httpCode = 0;
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeoutSeconds);
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5L);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 5L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, ""); // gzip/deflate/br - jo bhi server bheje, khud handle ho jayega
+    curl_easy_setopt(curl, CURLOPT_USERAGENT,
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+    curl_easy_cleanup(curl);
+
+    if (res != CURLE_OK || httpCode < 200 || httpCode >= 400) {
+        return string(); // fail -> khaali return, isDynamicPage() ise "dynamic" maan kar CDP fallback karwayega
+    }
+    return response;
+}
+
+// Chhota heuristic parser: <script>/<style>/comments hata kar sirf
+// "visible" text bacha lo, phir uski length se andaza lagao ke ye
+// asli content wala page hai ya ek khaali JS-shell.
+bool CDPScraper::isDynamicPage(const string& html) {
+    if (html.empty()) return true;
+
+    if (html.find("You need to enable JavaScript") != string::npos ||
+        html.find("Please enable JavaScript") != string::npos) {
+        return true; // pakka JS-only page hai
+    }
+
+    string text = html;
+    auto stripBlock = [&text](const string& openTag, const string& closeTag) {
+        size_t pos = 0;
+        while ((pos = text.find(openTag, pos)) != string::npos) {
+            size_t end = text.find(closeTag, pos + openTag.size());
+            if (end == string::npos) {
+                text.erase(pos);
+                break;
+            }
+            text.erase(pos, end + closeTag.size() - pos);
+        }
+    };
+    stripBlock("<script", "</script>");
+    stripBlock("<style", "</style>");
+    stripBlock("<!--", "-->");
+
+    // Baaki tags hata kar sirf visible text bacha lo
+    size_t contentLen = 0;
+    bool inTag = false;
+    bool prevSpace = true;
+    for (char c : text) {
+        if (c == '<') { inTag = true; continue; }
+        if (c == '>') { inTag = false; continue; }
+        if (inTag) continue;
+
+        if (isspace(static_cast<unsigned char>(c))) {
+            prevSpace = true;
+        } else {
+            contentLen++;
+            prevSpace = false;
+        }
+    }
+    (void)prevSpace;
+
+    // Bahut kam visible text (sirf boilerplate/khaali root div) -> dynamic page maan lo
+    const size_t kMinContentChars = 200;
+    return contentLen < kMinContentChars;
 }
 
 // ==========================================================
@@ -255,10 +344,15 @@ CDPScraper::CDPScraper(string chromeBinary, string port, int maxWaitSeconds, int
 }
 
 CDPScraper::~CDPScraper() {
-    for (auto& tab : pool_) {
-        if (tab && tab->client) {
-            tab->client->close();
-            closeTabRemote(tab->tabId);
+    // DynamicArray range-based for support nahi karta, isliye index-loop.
+    for (int i = 0; i < pool_.size(); i++) {
+        Tab* tab = pool_[i];
+        if (tab) {
+            if (tab->client) {
+                tab->client->close();
+                closeTabRemote(tab->tabId);
+            }
+            delete tab; // pool_ hi in Tab* ka sole owner tha
         }
     }
     pool_.clear();
@@ -297,7 +391,9 @@ void CDPScraper::launchChrome() {
     si.cb = sizeof(si);
     pi_ = PROCESS_INFORMATION{};
 
-    vector<char> cmd(launchCmd.begin(), launchCmd.end());
+    // CreateProcessA ko ek mutable char buffer chahiye - std::string::data()
+    // C++17 se non-const hai, isliye vector<char> ki zaroorat nahi.
+    string cmd = launchCmd;
     cmd.push_back('\0');
 
     bool started = CreateProcessA(nullptr, cmd.data(), nullptr, nullptr, FALSE,
@@ -362,11 +458,11 @@ void CDPScraper::closeTabRemote(const string& tabId) {
 // Ek naya tab kholo, websocket connect karo, aur ek baar ke setup commands
 // (Page/Runtime/Network enable + resource blocking) bhi yahin kar do -
 // taaki ye sab baar baar (har getHtml call par) na karna pade.
-unique_ptr<CDPScraper::Tab> CDPScraper::createTab() {
+CDPScraper::Tab* CDPScraper::createTab() {
     string newTabResponse = httpPut("http://localhost:" + port_ + "/json/new");
     json tabInfo = json::parse(newTabResponse);
 
-    auto tab = make_unique<Tab>();
+    Tab* tab = new Tab();
     tab->wsUrl = tabInfo["webSocketDebuggerUrl"].get<string>();
     tab->tabId = tabInfo.value("id", "");
 
@@ -394,17 +490,17 @@ unique_ptr<CDPScraper::Tab> CDPScraper::createTab() {
 
 // Pool se ek free tab uthao. Agar sab busy hain to koi tab release hone
 // tak wait karo (busy-wait ki jagah condition_variable).
-unique_ptr<CDPScraper::Tab> CDPScraper::acquireTab() {
+CDPScraper::Tab* CDPScraper::acquireTab() {
     unique_lock<mutex> lk(poolMutex_);
-    poolCv_.wait(lk, [this] { return !pool_.empty(); });
-    unique_ptr<Tab> tab = std::move(pool_.back());
+    poolCv_.wait(lk, [this] { return pool_.size() > 0; });
+    Tab* tab = pool_[pool_.size() - 1];
     pool_.pop_back();
     return tab;
 }
 
-void CDPScraper::releaseTab(unique_ptr<Tab> tab) {
+void CDPScraper::releaseTab(Tab* tab) {
     lock_guard<mutex> lk(poolMutex_);
-    pool_.push_back(std::move(tab));
+    pool_.push_back(tab);
     poolCv_.notify_one();
 }
 
@@ -414,7 +510,18 @@ string CDPScraper::getHtml(const string& url) {
         throw runtime_error("Chrome chal nahi raha");
     }
 
-    unique_ptr<Tab> tab = acquireTab();
+    // ===== Step 1: pehle plain curl se try karo - koi Chrome tab nahi lagta,
+    //        koi websocket nahi, bahut tez. =====
+    const long kCurlTimeoutSeconds = 6;
+    string curlHtml = curlFetchPage(url, kCurlTimeoutSeconds);
+    if (!isDynamicPage(curlHtml)) {
+        cout<<"curl page\n";
+        return curlHtml; // static/simple page mil gaya -> CDP ki zaroorat hi nahi
+    }
+
+    // ===== Step 2: curl fail hua (timeout/error) ya page dynamic nikla
+    //        (JS-shell / bahut kam visible content) -> ab CDP se render karo =====
+    Tab* tab = acquireTab();
     string html;
 
     try {
@@ -440,10 +547,10 @@ string CDPScraper::getHtml(const string& url) {
         html = result["result"]["value"].get<string>();
     }
     catch (...) {
-        releaseTab(std::move(tab));
+        releaseTab(tab);
         throw;
     }
-
-    releaseTab(std::move(tab));
+    cout<<"js page\n";
+    releaseTab(tab);
     return html;
 }

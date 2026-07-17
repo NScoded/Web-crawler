@@ -51,6 +51,8 @@
 #include <ixwebsocket/IXWebSocket.h>
 #include <nlohmann/json.hpp>
 
+#include "../include/STL/DynamicArray.h"
+
 #include <atomic>
 #include <condition_variable>
 #include <map>
@@ -58,7 +60,6 @@
 #include <mutex>
 #include <queue>
 #include <string>
-#include <vector>
 
 class CDPScraper {
 public:
@@ -142,17 +143,33 @@ private:
     bool waitForChromeEndpoint(int retries = 30) const;
 
     // ---- Ek naya tab kholo, websocket se connect karo, resource-blocking on karo ----
-    std::unique_ptr<Tab> createTab();
+    // Note: Tab* (raw, heap-owned) return karta hai, unique_ptr nahi -
+    // DynamicArray<T> sirf copyable T rakh sakta hai (move-only types jaise
+    // unique_ptr nahi), isliye pool khud hi Tab* ka owner hai.
+    Tab* createTab();
     void closeTabRemote(const std::string& tabId); // Chrome side se tab band karo
 
     // ---- Pool se ek free tab lo / wapas do ----
-    std::unique_ptr<Tab> acquireTab();
-    void releaseTab(std::unique_ptr<Tab> tab);
+    Tab* acquireTab();
+    void releaseTab(Tab* tab);
 
     // ---- Simple HTTP helpers (chrome ke debugging API se baat karne ke liye) ----
     static std::string httpGet(const std::string& url);
     static std::string httpPut(const std::string& url);
     static std::string httpDelete(const std::string& url);
+
+    // ---- Naya: pehle plain curl se try karna (CDP se bahut tez) ----
+    // Real website ka HTML seedha curl se fetch karta hai (JS execute nahi
+    // hota). Fail hone par (timeout/non-2xx/curl error) khaali string
+    // deta hai, jise isDynamicPage() "dynamic" maan kar CDP fallback
+    // trigger karwa deta hai.
+    static std::string curlFetchPage(const std::string& url, long timeoutSeconds);
+
+    // Heuristic: curl se mila HTML ek "asli" page hai ya ek khaali
+    // JS-shell (React/Vue/Angular root div jismein content JS baad me
+    // bharta hai). Khaali input ya bahut kam visible text -> true (yaani
+    // CDP se render karwana padega).
+    static bool isDynamicPage(const std::string& html);
 
     std::string chromeBin_;
     std::string port_;
@@ -163,9 +180,11 @@ private:
     bool chromeRunning_ = false;
 
     // Tab pool
+    // std::vector ki jagah apni DynamicArray - pool_ Tab* (raw, heap-owned)
+    // rakhta hai; destructor mein sab explicitly delete kiye jaate hain.
     std::mutex poolMutex_;
     std::condition_variable poolCv_;
-    std::vector<std::unique_ptr<Tab>> pool_;
+    DynamicArray<Tab*> pool_;
 
 #ifdef _WIN32
     PROCESS_INFORMATION pi_{};
