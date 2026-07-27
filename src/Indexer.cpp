@@ -6,8 +6,17 @@
 using namespace std;
 
 
-Indexer::Indexer()
-{
+Indexer::Indexer(){
+    string ignore="a,an,the,is,am,are,was,were,be,been,being,do,does,did,have,has,had,can,could,will,would,shall,should,may,might,must,i,me,my,mine,we,our,ours,you,your,yours,he,him,his,she,her,hers,it,its,they,them,their,theirs,this,that,these,those,who,whom,whose,what,which,when,where,why,how,and,or,but,if,then,else,than,because,while,although,though,of,to,in,on,at,by,for,with,from,into,onto,over,under,between,through,during,before,after,above,below,up,down,out,off,about,against,as,such,so,very,too,also,only,just,even,still,again,once,here,there,now,yet,all,any,both,each,few,more,most,other,some,no,nor,not,own,same,s,t,d,ll,m,o,re,ve,y";
+    std::stringstream ss(ignore);
+    
+    std::string word;
+
+    while (getline(ss, word, ','))
+    {
+        stopword.insert(word);
+    }
+    
 }
 
 Indexer::~Indexer()
@@ -45,34 +54,31 @@ void Indexer::buildIndex()
         cout<<"key: "<<array[i]<<" -> "<<freq<<endl;
 
     }
-    string name;
 
-    cout<<"------------------------------------------------------\n";
-    cout<<"Enter key: ";
-    cin>>name;
-    cout<<frequency.get(name)[0].freq<<" -> "<<frequency.get(name)[0].link<<endl;
-    cout<<frequency.get(name)[1].freq<<" -> "<<frequency.get(name)[1].link<<endl;
-    cout<<frequency.get(name)[2].freq<<" -> "<<frequency.get(name)[2].link<<endl;
 
 
     std::cout << "Indexing Completed." << std::endl;
+    
+    std::cout << "Storing "<<frequency.size()<<" words in database..." << std::endl;
+
+    storeIndex();
 }
 
-std::string Indexer::normalizeWord(const std::string& word)
+std::string Indexer::normalizeWord(std::string& word)
 {
     std::string normalized;
 
-    for (char ch : word)
-    {
+    for (char ch : word){
         unsigned char c = static_cast<unsigned char>(ch);
 
         // alphabets aur digits
-        if (std::isalnum(c))
-        {
+        if (std::isalnum(c)){
             normalized += std::tolower(c);
         }
     }
-
+    
+    if(stopword.exists(word))return "";
+    //normalized = stemWord(normalized);
     return normalized;
 }
 
@@ -136,9 +142,142 @@ void Indexer:: countWords(const std::string& html,string & link){
     
 }
 
-int main(){
-    Indexer index;
-    index.buildIndex();
-     
+bool Indexer::endsWith(const std::string& word,
+                       const std::string& suffix)
+{
+    if (word.length() < suffix.length())
+        return false;
 
+    return word.compare(word.length() - suffix.length(),
+                        suffix.length(),
+                        suffix) == 0;
 }
+
+bool Indexer::isVowel(char ch)
+{
+    ch = std::tolower(ch);
+    return ch == 'a' || ch == 'e' || ch == 'i' ||
+           ch == 'o' || ch == 'u';
+}
+
+bool Indexer::containsVowel(const std::string& word)
+{
+    for(char ch : word)
+    {
+        if(isVowel(ch))
+            return true;
+    }
+
+    return false;
+}
+
+bool Indexer::isDoubleConsonant(const std::string& word)
+{
+    if(word.length() < 2)
+        return false;
+
+    char a = word[word.length()-1];
+    char b = word[word.length()-2];
+
+    return a == b && !isVowel(a);
+}
+
+std::string Indexer::stemWord(std::string word)
+{
+    if(word.length() <= 2)
+        return word;
+
+    // studies -> study
+    if(endsWith(word,"ies") && word.length() > 4)
+    {
+        word.erase(word.length()-3);
+        word += "y";
+        return word;
+    }
+
+    // boxes -> box
+    // watches -> watch
+    if(endsWith(word,"es") && word.length() > 3)
+    {
+        word.erase(word.length()-2);
+        return word;
+    }
+
+    // booked -> book
+    // played -> play
+    if(endsWith(word,"ed"))
+    {
+        std::string stem = word.substr(0,word.length()-2);
+
+        if(containsVowel(stem))
+        {
+            word = stem;
+
+            if(isDoubleConsonant(word))
+                word.pop_back();
+
+            return word;
+        }
+    }
+
+    // racing -> race
+    // smelling -> smell
+    // running -> run
+    if(endsWith(word,"ing"))
+    {
+        std::string stem = word.substr(0,word.length()-3);
+
+        if(containsVowel(stem))
+        {
+            word = stem;
+
+            if(isDoubleConsonant(word))
+            {
+                word.pop_back();
+            }
+            else if(!word.empty() &&
+                    word.back()=='c')
+            {
+                word+='e';
+            }
+
+            return word;
+        }
+    }
+
+    // cars -> car
+    // books -> book
+    if(endsWith(word,"s") &&
+       !endsWith(word,"ss") &&
+       word.length()>3)
+    {
+        word.pop_back();
+    }
+
+    return word;
+}
+
+void Indexer::storeIndex()
+{
+    DynamicArray<std::string> keys = frequency.getkeys();
+
+    for (int i = 0; i < keys.size(); i++)
+    {
+        std::string url;
+
+        DynamicArray<Url> rank = frequency.get(keys[i]);
+
+        for (int j = 0; j < rank.size(); j++)
+        {
+            if (j > 0)
+                url += ",";
+
+            url += rank[j].link;
+        }
+
+        storage.putIndexer(keys[i], rank[0].freq, url);
+    }
+    cout<<"Storing complete\n";
+}
+
+

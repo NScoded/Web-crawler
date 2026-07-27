@@ -89,6 +89,15 @@ build CMakeFiles/crawler.dir/src/PageStorage.cpp.obj: CXX_COMPILER__crawler_unsc
   OBJECT_FILE_DIR = CMakeFiles\crawler.dir\src
   TARGET_SUPPORT_DIR = CMakeFiles\crawler.dir
 
+build CMakeFiles/crawler.dir/src/Indexer.cpp.obj: CXX_COMPILER__crawler_unscanned_ D$:/CodeQuotient/Project/Project$ 2$ -$ Crawler/Web_crawler/src/Indexer.cpp || cmake_object_order_depends_target_crawler
+  DEFINES = -DIXWEBSOCKET_USE_ZLIB
+  DEP_FILE = CMakeFiles\crawler.dir\src\Indexer.cpp.obj.d
+  FLAGS = -std=gnu++17
+  INCLUDES = -I"C:/Program Files/MySQL/MySQL Server 8.0/include"
+  OBJECT_DIR = CMakeFiles\crawler.dir
+  OBJECT_FILE_DIR = CMakeFiles\crawler.dir\src
+  TARGET_SUPPORT_DIR = CMakeFiles\crawler.dir
+
 build CMakeFiles/crawler.dir/CDP/CDPScraper.cpp.obj: CXX_COMPILER__crawler_unscanned_ D$:/CodeQuotient/Project/Project$ 2$ -$ Crawler/Web_crawler/CDP/CDPScraper.cpp || cmake_object_order_depends_target_crawler
   DEFINES = -DIXWEBSOCKET_USE_ZLIB
   DEP_FILE = CMakeFiles\crawler.dir\CDP\CDPScraper.cpp.obj.d
@@ -106,7 +115,7 @@ build CMakeFiles/crawler.dir/CDP/CDPScraper.cpp.obj: CXX_COMPILER__crawler_unsca
 #############################################
 # Link the executable crawler.exe
 
-build crawler.exe: CXX_EXECUTABLE_LINKER__crawler_ CMakeFiles/crawler.dir/src/Crawler.cpp.obj CMakeFiles/crawler.dir/src/Frontier.cpp.obj CMakeFiles/crawler.dir/src/HtmlParser.cpp.obj CMakeFiles/crawler.dir/src/Normalizer.cpp.obj CMakeFiles/crawler.dir/src/PageStorage.cpp.obj CMakeFiles/crawler.dir/CDP/CDPScraper.cpp.obj | C$:/msys64/ucrt64/lib/libixwebsocket.a C$:/msys64/ucrt64/lib/libcurl.dll.a C$:/msys64/ucrt64/lib/libz.dll.a
+build crawler.exe: CXX_EXECUTABLE_LINKER__crawler_ CMakeFiles/crawler.dir/src/Crawler.cpp.obj CMakeFiles/crawler.dir/src/Frontier.cpp.obj CMakeFiles/crawler.dir/src/HtmlParser.cpp.obj CMakeFiles/crawler.dir/src/Normalizer.cpp.obj CMakeFiles/crawler.dir/src/PageStorage.cpp.obj CMakeFiles/crawler.dir/src/Indexer.cpp.obj CMakeFiles/crawler.dir/CDP/CDPScraper.cpp.obj | C$:/msys64/ucrt64/lib/libixwebsocket.a C$:/msys64/ucrt64/lib/libcurl.dll.a C$:/msys64/ucrt64/lib/libz.dll.a
   LINK_LIBRARIES = C:/msys64/ucrt64/lib/libixwebsocket.a  C:/msys64/ucrt64/lib/libcurl.dll.a  -llibmysql  C:/msys64/ucrt64/lib/libz.dll.a  -lwsock32  -lws2_32  -lshlwapi  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   LINK_PATH = -LC:/PROGRA~1/MySQL/MYSQLS~1.0/lib
   OBJECT_DIR = CMakeFiles\crawler.dir

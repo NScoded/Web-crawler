@@ -4,6 +4,7 @@
 #include "../CDP/CDPScraper.h"
 #include "HtmlParser.h"
 #include "PageStorage.h"
+#include "Indexer.h"
 
 
 
@@ -17,6 +18,7 @@ class Crawler{
     CDPScraper fetch;
     HtmlParser htmlparser;
     PageStorage pages;
+    
 
     public:
     Crawler();

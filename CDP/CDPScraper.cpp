@@ -378,14 +378,24 @@ void CDPScraper::launchChrome() {
     profileDir_ = string(tempPath) + "cdp_profile_" + to_string(pid);
 
     string launchCmd =
-        "\"" + chromeBin_ + "\""
-        " --headless=new"
-        " --disable-gpu"
-        " --remote-allow-origins=*"
-        " --remote-debugging-port=" + port_ +
-        " --user-data-dir=\"" + profileDir_ + "\""
-        + CHROME_LEAN_FLAGS +
-        " about:blank";
+    "\"" + chromeBin_ + "\""
+    " --headless=new"
+    " --disable-gpu"
+    " --remote-allow-origins=*"
+    " --remote-debugging-port=" + port_ +
+    " --user-data-dir=\"" + profileDir_ + "\""
+    " --disable-logging"
+    " --log-level=3"
+    " --disable-background-networking"
+    " --disable-component-update"
+    " --disable-sync"
+    " --metrics-recording-only"
+    " --disable-default-apps"
+    " --no-first-run"
+    " --no-default-browser-check"
+    " --disable-features=MediaRouter"
+    + CHROME_LEAN_FLAGS +
+    " about:blank";
 
     STARTUPINFOA si{};
     si.cb = sizeof(si);

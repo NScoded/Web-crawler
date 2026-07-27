@@ -163,31 +163,58 @@ int main(){
     cout << "Main Started\n";
 
     Crawler c;
+    Indexer indexer;
+    
     
 
-
-    cout << "Crawler Created\n";
+    cout << "\nCrawler Created\n";
 
     string input;
     int depth,size;
 
-    int choice;
-    cout<<"1. Continue crawler?\n2. Start from a seed link?\n";
-    cin>>choice;
-    if(choice==1){
-        c.Continue();
+    while(true){
 
-    }
-    else if(choice ==2){
-        cout<<"Enter a Seed link: ";
-        cin>>input;
-        cout<<"Enter MaxDepth: ";
-        cin>>depth;
-        c.crawl(input,depth);
-        cout<<"Finished\n";
-    }
-    else{
-        cout<<"You entered an invalid choice";
+        char choice;
+        cout<<"--------------------------------------------------\n";
+        cout<<"1. Continue crawler?\n2. Start from a seed link?\n3. Start Indexer\n5. Exit\n";
+        cin>>choice;
+        cout<<"--------------------------------------------------\n";
+        if(choice=='1'){
+            c.Continue();
+    
+        }
+        else if(choice =='2'){
+            int size;
+            cout<<"Enter number of seed links: ";
+            cin>>size;
+            DynamicArray<string>seed;
+            DynamicArray<int>dept;
+            for(int i=0;i<size;i++){
+                cout<<"Enter a Seed link: ";
+                cin>>input;
+                cout<<"Enter MaxDepth: ";
+                cin>>depth;
+                seed.push_back(input);
+                dept.push_back(depth);
+            }
+            for(int i=0;i<size;i++){
+                c.crawl(seed[i],dept[i]);
+            }
+            cout<<"Finished\n";
+        }
+        else if(choice =='3'){
+            indexer.buildIndex();
+
+        }
+        else if(choice =='5'){
+            cout<<"Crawler exit...";
+            break;
+            
+        }
+        else{
+            cout<<"You entered an invalid choice \n";
+        }
+
     }
 
     

@@ -1,5 +1,7 @@
+#pragma once
+
 #include "STL/DynamicArray.h"
-#include<string>
+#include <string>
 
 
 class HtmlParser{

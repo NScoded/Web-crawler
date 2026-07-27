@@ -4,6 +4,7 @@
 
 using namespace std;
 
+// PageStorage()
 PageStorage::PageStorage(){
     conn = mysql_init(nullptr);
 
@@ -32,6 +33,7 @@ PageStorage::PageStorage(){
     cout << "Database Connected Successfully" << endl;
 }
 
+// putFrontier()
 bool PageStorage::putFrontier(string url, int depth, int max, int Id)
 {
     const char *query =
@@ -100,6 +102,7 @@ bool PageStorage::putFrontier(string url, int depth, int max, int Id)
     return true;
 }
 
+// getFrontier()
 void PageStorage::getFrontier(string &url,int &depth){
     string query="select url,depth from frontier order by id desc LIMIT 1";
     if(mysql_query(conn,query.c_str())){
@@ -128,7 +131,7 @@ void PageStorage::getFrontier(string &url,int &depth){
     return ;
 }
 
-
+// deleteFrontier
 bool PageStorage::deleteFrontier(string url, int depth)
 {
     std::string query =
@@ -145,6 +148,7 @@ bool PageStorage::deleteFrontier(string url, int depth)
     return true;
 }
 
+//storePage
 bool PageStorage::storePage(std::string &url,
                             std::string &html,
                             int depth,
@@ -218,6 +222,7 @@ bool PageStorage::storePage(std::string &url,
     return true;
 }
 
+//getLastFrontier
 string PageStorage::getLastFrontier(string& url,int& deep,int& id,int&max)
 {
     string query = "SELECT url,depth,seed_id,max_depth FROM frontier ORDER BY id LIMIT 1";
@@ -255,6 +260,7 @@ string PageStorage::getLastFrontier(string& url,int& deep,int& id,int&max)
     return url;
 }
 
+//getPage()
 bool PageStorage::getPage(const string &url,
                           int &depth,
                           string &html,

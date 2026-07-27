@@ -18,6 +18,7 @@ add_executable(crawler
     src/HtmlParser.cpp
     src/Normalizer.cpp
     src/PageStorage.cpp
+    src/Indexer.cpp
     CDP/CDPScraper.cpp
 )
 

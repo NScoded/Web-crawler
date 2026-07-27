@@ -1,27 +1,18 @@
 # ninja log v7
-70	2007	8061962281590691	CMakeFiles/crawler.dir/src/HtmlParser.cpp.obj	63a715f46ef3f400
-80	5715	8061961332768338	CMakeFiles/crawler.dir/src/Frontier.cpp.obj	ab08106b839ce2c3
-130	6147	8061961333274437	CMakeFiles/crawler.dir/src/Normalizer.cpp.obj	ce8a1282d92f5de0
-12	6754	8061645762567936	CMakeFiles/crawler.dir/CDP/CDPScraper.cpp.obj	869186287f0406ab
-23	7926	8062245014363657	CMakeFiles/crawler.dir/src/Crawler.cpp.obj	986c01f8caeec0d2
-7927	8828	8062245093409969	crawler.exe	b7cfbac3cb69f911
-46	1759	8062245828609466	build.ninja	b2aac4168f2cf8c
-46	1759	8062245828277130	D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/build/cmake_install.cmake	b2aac4168f2cf8c
-220	4921	8058954548795116	CMakeFiles/crawler.dir/Database/Database.cpp.obj	eab0a17f4f06b7e
-199	5837	8061961334021617	CMakeFiles/crawler.dir/src/PageStorage.cpp.obj	212020edaaf548f1
-65	5172	8062245014787618	CMakeFiles/crawler.dir/src/Indexer.cpp.obj	1ae51c16a92c77d8
-9	1742	8062245828609466	build.ninja	b2aac4168f2cf8c
-9	1742	8062245828609466	D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/build/cmake_install.cmake	b2aac4168f2cf8c
 178	3534	8062245831910360	CMakeFiles/crawler.dir/src/HtmlParser.cpp.obj	63a715f46ef3f400
-86	6962	8062245831183481	CMakeFiles/crawler.dir/src/Frontier.cpp.obj	ab08106b839ce2c3
-416	7557	8062245834283922	CMakeFiles/crawler.dir/src/PageStorage.cpp.obj	212020edaaf548f1
-282	7630	8062245832946892	CMakeFiles/crawler.dir/src/Normalizer.cpp.obj	ce8a1282d92f5de0
-33	9415	8062245830434040	CMakeFiles/crawler.dir/src/Crawler.cpp.obj	986c01f8caeec0d2
-9415	9948	8062245924262553	crawler.exe	a95bc1e76419af6b
-12	4255	8062247367584689	CMakeFiles/crawler.dir/src/Crawler.cpp.obj	986c01f8caeec0d2
-4257	4787	8062247410025723	crawler.exe	a95bc1e76419af6b
-54	6241	8062353540011627	CMakeFiles/crawler.dir/src/Frontier.cpp.obj	ab08106b839ce2c3
-165	6339	8062353541129422	CMakeFiles/crawler.dir/src/PageStorage.cpp.obj	212020edaaf548f1
-95	6662	8062353540421274	CMakeFiles/crawler.dir/src/Normalizer.cpp.obj	ce8a1282d92f5de0
-28	9203	8062353539747162	CMakeFiles/crawler.dir/src/Crawler.cpp.obj	986c01f8caeec0d2
-9204	10206	8062353631516791	crawler.exe	a95bc1e76419af6b
+81	5821	8062466195279634	CMakeFiles/crawler.dir/src/Frontier.cpp.obj	ab08106b839ce2c3
+76	26405	8062501898082172	CMakeFiles/crawler.dir/src/Normalizer.cpp.obj	ce8a1282d92f5de0
+172	9979	8062471719781617	CMakeFiles/crawler.dir/CDP/CDPScraper.cpp.obj	869186287f0406ab
+85	8970	8062500557585853	CMakeFiles/crawler.dir/src/Crawler.cpp.obj	986c01f8caeec0d2
+28653	32428	8062502183821599	crawler.exe	b7cfbac3cb69f911
+6	1406	8068404458602890	build.ninja	b2aac4168f2cf8c
+6	1406	8068404458460269	D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/build/cmake_install.cmake	b2aac4168f2cf8c
+220	4921	8058954548795116	CMakeFiles/crawler.dir/Database/Database.cpp.obj	eab0a17f4f06b7e
+186	27834	8062501899178584	CMakeFiles/crawler.dir/src/PageStorage.cpp.obj	212020edaaf548f1
+17	3478	8062467228213090	CMakeFiles/crawler.dir/src/Indexer.cpp.obj	1ae51c16a92c77d8
+19	933	8068404458602890	build.ninja	b2aac4168f2cf8c
+19	933	8068404458602890	D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/build/cmake_install.cmake	b2aac4168f2cf8c
+42	1466	8068404459524056	CMakeFiles/crawler.dir/src/HtmlParser.cpp.obj	63a715f46ef3f400
+107	3155	8068404460383906	CMakeFiles/crawler.dir/src/Normalizer.cpp.obj	ce8a1282d92f5de0
+19	4616	8068404459292659	CMakeFiles/crawler.dir/src/Crawler.cpp.obj	986c01f8caeec0d2
+4617	5139	8068404505266298	crawler.exe	b7cfbac3cb69f911

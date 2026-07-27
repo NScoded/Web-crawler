@@ -38,7 +38,20 @@ size_t HtmlParser::parseHref(const string &html,size_t start){
             while(index<html.size()){
                 char d=html[index];
                 if(d=='"' || d=='\'' || d==')' || d==';'|| d=='<'|| d==' '){
-                    links.push_back(html.substr(first,index-first));
+                    string url = html.substr(first,index-first);
+                    if (!url.empty()) {
+                        string lowerUrl = url;
+                        for (char &ch : lowerUrl)
+                            ch = (char)tolower((unsigned char)ch);
+                        if (lowerUrl.rfind("mailto:", 0) != 0 &&
+                            lowerUrl.rfind("javascript:", 0) != 0 &&
+                            lowerUrl.rfind("data:", 0) != 0 &&
+                            lowerUrl.rfind("tel:", 0) != 0 &&
+                            lowerUrl[0] != '#')
+                        {
+                            links.push_back(url);
+                        }
+                    }
                     return index;
                 }
                 index++;
@@ -59,7 +72,8 @@ DynamicArray<string> HtmlParser::parseLinks(const string &html){
             index=parseHref(html,index+4);
             continue;
         }
-        if(html.compare(index,4,"http")==0){
+        if((index + 7 <= html.size() && html.compare(index,7,"http://") == 0) ||
+           (index + 8 <= html.size() && html.compare(index,8,"https://") == 0)){
             index=parseHttp(html,index);
             continue;
         }

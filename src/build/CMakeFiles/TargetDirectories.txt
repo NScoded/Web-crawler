@@ -1,3 +1,0 @@
-D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/src/build/CMakeFiles/IndexerTest.dir
-D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/src/build/CMakeFiles/edit_cache.dir
-D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/src/build/CMakeFiles/rebuild_cache.dir
