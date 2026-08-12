@@ -24,6 +24,9 @@ CMAKE_AR:FILEPATH=C:/msys64/ucrt64/bin/ar.exe
 // MinSizeRel ...
 CMAKE_BUILD_TYPE:STRING=
 
+//Enable/Disable color output during build.
+CMAKE_COLOR_MAKEFILE:BOOL=ON
+
 //CXX compiler
 CMAKE_CXX_COMPILER:FILEPATH=C:/msys64/ucrt64/bin/c++.exe
 
@@ -100,12 +103,6 @@ CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=
 //Flags used by the linker during RELWITHDEBINFO builds.
 CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
-//Enable/Disable output of build database during the build.
-CMAKE_EXPORT_BUILD_DATABASE:BOOL=
-
-//Enable/Disable output of compile commands during generation.
-CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=
-
 //Value Computed by CMake.
 CMAKE_FIND_PACKAGE_REDIRECTS_DIR:STATIC=D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/build/CMakeFiles/pkgRedirects
 
@@ -113,13 +110,13 @@ CMAKE_FIND_PACKAGE_REDIRECTS_DIR:STATIC=D:/CodeQuotient/Project/Project 2 - Craw
 CMAKE_GNUtoMS:BOOL=OFF
 
 //Install path prefix, prepended onto install directories.
-CMAKE_INSTALL_PREFIX:PATH=C:/Program Files (x86)/cdp_scraper
+CMAKE_INSTALL_PREFIX:PATH=C:/Program Files (x86)/crawler
 
 //Path to a program.
 CMAKE_LINKER:FILEPATH=C:/msys64/ucrt64/bin/ld.exe
 
-//Program used to build from build.ninja files.
-CMAKE_MAKE_PROGRAM:FILEPATH=C:/msys64/ucrt64/bin/ninja.exe
+//Path to a program.
+CMAKE_MAKE_PROGRAM:FILEPATH=C:/msys64/ucrt64/bin/mingw32-make.exe
 
 //Flags used by the linker during the creation of modules during
 // all build types.
@@ -283,15 +280,6 @@ ZLIB_LIBRARY_DEBUG:FILEPATH=ZLIB_LIBRARY_DEBUG-NOTFOUND
 ZLIB_LIBRARY_RELEASE:FILEPATH=C:/msys64/ucrt64/lib/libz.dll.a
 
 //Value Computed by CMake
-cdp_scraper_BINARY_DIR:STATIC=D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/build
-
-//Value Computed by CMake
-cdp_scraper_IS_TOP_LEVEL:STATIC=ON
-
-//Value Computed by CMake
-cdp_scraper_SOURCE_DIR:STATIC=D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler
-
-//Value Computed by CMake
 crawler_BINARY_DIR:STATIC=D:/CodeQuotient/Project/Project 2 - Crawler/Web_crawler/build
 
 //Value Computed by CMake
@@ -350,9 +338,11 @@ CMAKE_CACHEFILE_DIR:INTERNAL=d:/CodeQuotient/Project/Project 2 - Crawler/Web_cra
 //Major version of cmake used to create the current loaded cache
 CMAKE_CACHE_MAJOR_VERSION:INTERNAL=4
 //Minor version of cmake used to create the current loaded cache
-CMAKE_CACHE_MINOR_VERSION:INTERNAL=3
+CMAKE_CACHE_MINOR_VERSION:INTERNAL=4
 //Patch version of cmake used to create the current loaded cache
-CMAKE_CACHE_PATCH_VERSION:INTERNAL=4
+CMAKE_CACHE_PATCH_VERSION:INTERNAL=2
+//ADVANCED property for variable: CMAKE_COLOR_MAKEFILE
+CMAKE_COLOR_MAKEFILE-ADVANCED:INTERNAL=1
 //Path to CMake executable.
 CMAKE_COMMAND:INTERNAL=C:/msys64/ucrt64/bin/cmake.exe
 //Path to cpack program executable.
@@ -395,8 +385,13 @@ CMAKE_C_FLAGS_RELEASE-ADVANCED:INTERNAL=1
 CMAKE_C_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_C_STANDARD_LIBRARIES
 CMAKE_C_STANDARD_LIBRARIES-ADVANCED:INTERNAL=1
+//Set initial state for CMake diagnostics; used to persist state
+// set by command-line options across invocations.
+CMAKE_DIAGNOSTIC_INIT:INTERNAL=CMD_AUTHOR=WARN;CMD_DEPRECATED=WARN;CMD_EXPERIMENTAL=WARN;CMD_INSTALL_ABSOLUTE_DESTINATION=IGNORE;CMD_POLICY=WARN;CMD_UNINITIALIZED=IGNORE;CMD_UNUSED_CLI=WARN
 //ADVANCED property for variable: CMAKE_DLLTOOL
 CMAKE_DLLTOOL-ADVANCED:INTERNAL=1
+//Deprecated.  Use -W[no-]error=deprecated instead.
+CMAKE_ERROR_DEPRECATED:INTERNAL=OFF
 //Executable file format
 CMAKE_EXECUTABLE_FORMAT:INTERNAL=Unknown
 //ADVANCED property for variable: CMAKE_EXE_LINKER_FLAGS
@@ -409,14 +404,10 @@ CMAKE_EXE_LINKER_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
 CMAKE_EXE_LINKER_FLAGS_RELEASE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
 CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_EXPORT_BUILD_DATABASE
-CMAKE_EXPORT_BUILD_DATABASE-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_EXPORT_COMPILE_COMMANDS
-CMAKE_EXPORT_COMPILE_COMMANDS-ADVANCED:INTERNAL=1
 //Name of external makefile project generator.
 CMAKE_EXTRA_GENERATOR:INTERNAL=
 //Name of generator.
-CMAKE_GENERATOR:INTERNAL=Ninja
+CMAKE_GENERATOR:INTERNAL=MinGW Makefiles
 //Generator instance identifier.
 CMAKE_GENERATOR_INSTANCE:INTERNAL=
 //Name of generator platform.
@@ -501,6 +492,8 @@ CMAKE_STRIP-ADVANCED:INTERNAL=1
 CMAKE_TAPI-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
+//Deprecated.  Use -W[no-]deprecated instead.
+CMAKE_WARN_DEPRECATED:INTERNAL=ON
 //ADVANCED property for variable: CURL_DIR
 CURL_DIR-ADVANCED:INTERNAL=1
 //Details about finding CURL
@@ -717,7 +710,7 @@ _nghttp2_STATIC_LIBS:INTERNAL=
 _nghttp2_STATIC_LIBS_L:INTERNAL=
 _nghttp2_STATIC_LIBS_OTHER:INTERNAL=
 _nghttp2_STATIC_LIBS_PATHS:INTERNAL=
-_nghttp2_VERSION:INTERNAL=1.69.0
+_nghttp2_VERSION:INTERNAL=1.70.0
 _nghttp2_libnghttp2_INCLUDEDIR:INTERNAL=
 _nghttp2_libnghttp2_LIBDIR:INTERNAL=
 _nghttp2_libnghttp2_PREFIX:INTERNAL=
@@ -752,7 +745,7 @@ _nghttp3_STATIC_LIBS:INTERNAL=
 _nghttp3_STATIC_LIBS_L:INTERNAL=
 _nghttp3_STATIC_LIBS_OTHER:INTERNAL=
 _nghttp3_STATIC_LIBS_PATHS:INTERNAL=
-_nghttp3_VERSION:INTERNAL=1.17.0
+_nghttp3_VERSION:INTERNAL=1.18.0
 _nghttp3_libnghttp3_INCLUDEDIR:INTERNAL=
 _nghttp3_libnghttp3_LIBDIR:INTERNAL=
 _nghttp3_libnghttp3_PREFIX:INTERNAL=
@@ -792,12 +785,12 @@ _ngtcp2_libngtcp2_INCLUDEDIR:INTERNAL=C:/msys64/ucrt64/bin/../include
 _ngtcp2_libngtcp2_LIBDIR:INTERNAL=C:/msys64/ucrt64/bin/../lib
 _ngtcp2_libngtcp2_MODULE_NAME:INTERNAL=libngtcp2
 _ngtcp2_libngtcp2_PREFIX:INTERNAL=C:/msys64/ucrt64/bin/..
-_ngtcp2_libngtcp2_VERSION:INTERNAL=1.24.0
+_ngtcp2_libngtcp2_VERSION:INTERNAL=1.25.0
 _ngtcp2_libngtcp2_crypto_ossl_INCLUDEDIR:INTERNAL=C:/msys64/ucrt64/bin/../include
 _ngtcp2_libngtcp2_crypto_ossl_LIBDIR:INTERNAL=C:/msys64/ucrt64/bin/../lib
 _ngtcp2_libngtcp2_crypto_ossl_MODULE_NAME:INTERNAL=libngtcp2_crypto_ossl
 _ngtcp2_libngtcp2_crypto_ossl_PREFIX:INTERNAL=C:/msys64/ucrt64/bin/..
-_ngtcp2_libngtcp2_crypto_ossl_VERSION:INTERNAL=1.24.0
+_ngtcp2_libngtcp2_crypto_ossl_VERSION:INTERNAL=1.25.0
 _zstd_CFLAGS:INTERNAL=-IC:/msys64/ucrt64/bin/../include
 _zstd_CFLAGS_I:INTERNAL=
 _zstd_CFLAGS_OTHER:INTERNAL=

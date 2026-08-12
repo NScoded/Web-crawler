@@ -5,8 +5,18 @@
 
 using namespace std;
 
+static void sanitizeUrl(std::string &link)
+{
+    for (char &ch : link)
+    {
+        if (ch == '\\')
+            ch = '/';
+    }
+}
+
 // put(link and depth)
 void Frontier::put(string & link,int deep,int max,int Id){
+    sanitizeUrl(link);
     URL url;
     url.link=link;
     url.depth=deep;
@@ -15,6 +25,7 @@ void Frontier::put(string & link,int deep,int max,int Id){
 }
 // put(link,depth and maxDepth)
 size_t Frontier::putSeed(string & link,string & html,int max,int deep){
+    sanitizeUrl(link);
     size_t seedId = pages.putSeeds(link,html,deep,max);
     if (seedId == 0) {
         return 0;
@@ -44,10 +55,10 @@ void Frontier::backup()
     string link = "null";
     int depth = 0;
     cout<<"Backup called\n";
+    cout<<"Taking Backeup from Pages\n";
 
     while (true)
     {
-        cout<<"inside while\n";
         pages.getFrontier(link, depth);
 
         if (link == "null"){
@@ -56,6 +67,7 @@ void Frontier::backup()
                 break;
         }
 
+        sanitizeUrl(link);
         URL url;
         url.link = link;
         url.depth = depth;

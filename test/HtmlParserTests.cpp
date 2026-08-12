@@ -119,3 +119,15 @@ TEST_F(HtmlParserTest, MixedContent)
     EXPECT_EQ(links[0], "https://one.com");
     EXPECT_EQ(links[1], "https://two.com");
 }
+
+TEST_F(HtmlParserTest, ExtractsOnlyTheFirstTitleBlock)
+{
+    std::string html =
+        "<html><head><title>AWS Academy | Training and Certification | AWS</title></head>"
+        "<body><div>Some content</div></body></html>";
+
+    std::string title;
+    DynamicArray<std::string> links = parser.parseLinks(html, title);
+
+    EXPECT_EQ(title, "AWS Academy | Training and Certification | AWS");
+}

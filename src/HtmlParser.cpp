@@ -9,7 +9,13 @@ size_t HtmlParser ::parseHttp(const string &html,size_t start){
     while(index<html.size()){
         char c=html[index];
         if(c=='\'' || c=='"' || c==')' || c==';' || c=='<'|| c==' '){
-            links.push_back(html.substr(start,index-start));
+            string url = html.substr(start,index-start);
+            for (char &ch : url)
+            {
+                if (ch == '\\')
+                    ch = '/';
+            }
+            links.push_back(url);
             return index;
         }
         index++;
@@ -39,6 +45,11 @@ size_t HtmlParser::parseHref(const string &html,size_t start){
                 char d=html[index];
                 if(d=='"' || d=='\'' || d==')' || d==';'|| d=='<'|| d==' '){
                     string url = html.substr(first,index-first);
+                    for (char &ch : url)
+                    {
+                        if (ch == '\\')
+                            ch = '/';
+                    }
                     if (!url.empty()) {
                         string lowerUrl = url;
                         for (char &ch : lowerUrl)
@@ -64,19 +75,45 @@ size_t HtmlParser::parseHref(const string &html,size_t start){
     return html.size();
 }
 
-DynamicArray<string> HtmlParser::parseLinks(const string &html){
+DynamicArray<string> HtmlParser::parseLinks(const string &html,string &title){
     size_t index=0;
+    title="";
     links.clear();
-    while(index+4<=html.size()){
-        if(html.compare(index,4,"href")==0){
+
+    while(index < html.size()){
+        if(html[index]=='<'){
+            size_t tagStart = index + 1;
+            while(tagStart < html.size() && html[tagStart]==' ')tagStart++;
+
+            if (html.compare(tagStart, 5, "title") == 0){
+                size_t tagEnd = tagStart + 5;
+                while(tagEnd < html.size() && html[tagEnd] != '>') tagEnd++;
+
+                if (tagEnd < html.size()){
+                    size_t contentStart = tagEnd + 1;
+                    size_t contentEnd = html.find('<', contentStart);
+                    if (contentEnd == string::npos) contentEnd = html.size();
+
+                    title = html.substr(contentStart, contentEnd - contentStart);
+                    while (!title.empty() && isspace((unsigned char)title.back())) title.pop_back();
+                    while (!title.empty() && isspace((unsigned char)title.front())) title.erase(title.begin());
+
+                    index = contentEnd;
+                    continue;
+                }
+            }
+        }
+
+        if (index + 3 < html.size() && html.compare(index, 4, "href") == 0){
             index=parseHref(html,index+4);
             continue;
         }
-        if((index + 7 <= html.size() && html.compare(index,7,"http://") == 0) ||
-           (index + 8 <= html.size() && html.compare(index,8,"https://") == 0)){
+        if((index + 6 < html.size() && html.compare(index,7,"http://") == 0) ||
+           (index + 7 < html.size() && html.compare(index,8,"https://") == 0)){
             index=parseHttp(html,index);
             continue;
         }
+
         index++;
     }
 
@@ -102,10 +139,8 @@ string HtmlParser:: parseContent(const string& html)
     skipTags.insert("link");
     skipTags.insert("title");
 
-    for (size_t i = 0; i < html.size(); i++)
-    {
-        if (html[i] == '<')
-        {
+    for (size_t i = 0; i < html.size(); i++){
+        if (html[i] == '<'){
             insideTag = true;
             tag.clear();
 
@@ -130,8 +165,7 @@ string HtmlParser:: parseContent(const string& html)
             while (i < html.size() && html[i] != '>')
                 i++;
 
-            if (skipTags.exists(tag))
-            {
+            if (skipTags.exists(tag)){
                 if (closing)
                     skipContent = false;
                 else

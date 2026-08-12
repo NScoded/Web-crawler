@@ -141,10 +141,15 @@ bool Normalizer::isrelative(string &source)
 }
 
 // normalize()
-void Normalizer::normalize(string &source)
+void Normalizer::normalize(string &source,string & auth)
 {
     
     removeFragment(source);
+    for (char &c : source)
+    {
+        if (c == '\\')
+            c = '/';
+    }
     if (source.empty())
         return;
 
@@ -240,7 +245,11 @@ void Normalizer::normalize(string &source)
         source = "";
         return;
     }
-
+    auth=authority;
+    size_t authpos=authority.find('.');
+    if(authpos!=string::npos){
+        auth=authority.substr(0,authpos);
+    }
     source = scheme + "://" + authority + path + query;
 }
 

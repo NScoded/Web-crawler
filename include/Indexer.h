@@ -15,6 +15,8 @@ private:
 
     struct Url{
         std::string link;
+        std::string title;
+        std::string auth;
         int freq;
     };
     std::string stemWord(std::string word);
@@ -28,22 +30,23 @@ private:
 
     bool isDoubleConsonant(const std::string& word);
     Set<std::string>stopword;
+    Set<std::string>ignoreTitle;
     // Parse HTML and build frequency map
-    void countWords(const std::string& html, std::string & url);
+    void countWords(const std::string& html, std::string & url,std::string &authority,std::string &title);
 
     
     
     // Convert text into lowercase words
-    std::string normalizeWord( std::string& word);
     
     // Store one page's index into database
     void storeIndex();
-        
-        public:
-        Indexer();
-        ~Indexer();
-        HashMap<std::string, DynamicArray<Url>> frequency;
-
+    
+    public:
+    Indexer();
+    ~Indexer();
+    HashMap<std::string, DynamicArray<Url>> frequency;
+    
     // Build index for all pages
     void buildIndex();
+    std::string normalizeWord( std::string& word);
 };

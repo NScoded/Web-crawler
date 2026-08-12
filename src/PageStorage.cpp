@@ -134,28 +134,62 @@ void PageStorage::getFrontier(string &url,int &depth){
 // deleteFrontier
 bool PageStorage::deleteFrontier(string url, int depth)
 {
-    std::string query =
-        "DELETE FROM frontier where url = '" +
-        url + "' and depth = " + std::to_string(depth) + " ;";
+    const char *query = "DELETE FROM frontier WHERE url = ? AND depth = ?";
 
-    if (mysql_query(conn, query.c_str()))
+    MYSQL_STMT *stmt = mysql_stmt_init(conn);
+    if (stmt == nullptr)
     {
-        std::cout << "Error inserting into frontier: "
-                  << mysql_error(conn) << std::endl;
+        std::cout << "Statement initialization failed" << std::endl;
         return false;
     }
 
+    if (mysql_stmt_prepare(stmt, query, strlen(query)))
+    {
+        std::cout << "Prepare Error : " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return false;
+    }
+
+    MYSQL_BIND bind[2];
+    memset(bind, 0, sizeof(bind));
+
+    unsigned long urlLength = url.length();
+
+    bind[0].buffer_type = MYSQL_TYPE_STRING;
+    bind[0].buffer = (char *)url.c_str();
+    bind[0].buffer_length = urlLength;
+    bind[0].length = &urlLength;
+
+    bind[1].buffer_type = MYSQL_TYPE_LONG;
+    bind[1].buffer = &depth;
+
+    if (mysql_stmt_bind_param(stmt, bind))
+    {
+        std::cout << "Bind Error : " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return false;
+    }
+
+    if (mysql_stmt_execute(stmt))
+    {
+        std::cout << "Error deleting from frontier: " << mysql_stmt_error(stmt) << std::endl;
+        mysql_stmt_close(stmt);
+        return false;
+    }
+
+    mysql_stmt_close(stmt);
     return true;
 }
 
 //storePage
 bool PageStorage::storePage(std::string &url,
                             std::string &html,
+                            std::string &authority,
+                            std::string &title,
                             int depth,
-                            int id)
-{
+                            int id){
     const char *query =
-        "INSERT INTO pages(url, depth, html, seed_id) VALUES(?, ?, ?, ?)";
+        "INSERT INTO pages(url, depth, html, seed_id, authority, title) VALUES(?, ?, ?, ?, ?, ?)";
 
     MYSQL_STMT *stmt = mysql_stmt_init(conn);
 
@@ -168,16 +202,18 @@ bool PageStorage::storePage(std::string &url,
     if (mysql_stmt_prepare(stmt, query, strlen(query)))
     {
         duplicatePages++;
-        cout<<"Duplicate pages found: "<<duplicatePages;
+        cout << "Duplicate pages found: " << duplicatePages;
         mysql_stmt_close(stmt);
         return false;
     }
 
-    MYSQL_BIND bind[4];
+    MYSQL_BIND bind[6];
     memset(bind, 0, sizeof(bind));
 
     unsigned long urlLength = url.length();
     unsigned long htmlLength = html.length();
+    unsigned long authorityLength = authority.length();
+    unsigned long titleLength = title.length();
 
     // url
     bind[0].buffer_type = MYSQL_TYPE_STRING;
@@ -198,6 +234,18 @@ bool PageStorage::storePage(std::string &url,
     // seed_id
     bind[3].buffer_type = MYSQL_TYPE_LONG;
     bind[3].buffer = &id;
+
+    // authority
+    bind[4].buffer_type = MYSQL_TYPE_STRING;
+    bind[4].buffer = (char *)authority.c_str();
+    bind[4].buffer_length = authorityLength;
+    bind[4].length = &authorityLength;
+
+    // title
+    bind[5].buffer_type = MYSQL_TYPE_STRING;
+    bind[5].buffer = (char *)title.c_str();
+    bind[5].buffer_length = titleLength;
+    bind[5].length = &titleLength;
 
     if (mysql_stmt_bind_param(stmt, bind))
     {
@@ -225,7 +273,7 @@ bool PageStorage::storePage(std::string &url,
 //getLastFrontier
 string PageStorage::getLastFrontier(string& url,int& deep,int& id,int&max)
 {
-    string query = "SELECT url,depth,seed_id,max_depth FROM frontier ORDER BY id LIMIT 1";
+    string query = "SELECT url,depth,seed_id,max_depth FROM frontier ORDER BY id DESC LIMIT 1";
 
     if (mysql_query(conn, query.c_str()))
     {
@@ -304,7 +352,7 @@ bool PageStorage:: clearFrontier(){
     string query="TRUNCATE FRONTIER;";
     if (mysql_query(conn, query.c_str()))
     {
-        std::cout << "Error inserting into frontier: "
+        std::cout << "Error clearing frontier: "
                   << mysql_error(conn) << std::endl;
         return false;
     }
@@ -563,8 +611,7 @@ std::string PageStorage::getUrl(int id)
 
 bool PageStorage::putIndexer(const std::string &word,
                              int maxFrequency,
-                             const std::string &url)
-{
+                             const std::string &url){
     const char *query =
         "INSERT INTO indexer(word, max_frequency, url) "
         "VALUES(?, ?, ?)";
@@ -608,4 +655,154 @@ bool PageStorage::putIndexer(const std::string &word,
 
     mysql_stmt_close(stmt);
     return success;
+}
+
+DynamicArray<string> PageStorage:: getIndexer(string &word){
+    DynamicArray<string> links;
+
+    string query = "SELECT url FROM indexer WHERE word='" + word + "';";
+
+    if (mysql_query(conn, query.c_str()))
+    {
+        cout << "Error in getting word from indexer: "
+             << mysql_error(conn) << endl;
+        return links;
+    }
+
+    MYSQL_RES* result = mysql_store_result(conn);
+
+    if (result == nullptr)
+        return links;
+
+    MYSQL_ROW row = mysql_fetch_row(result);
+
+    if (row == nullptr)
+    {
+        mysql_free_result(result);
+        return links;
+    }
+
+    string url = row[0];
+
+    while (true)
+    {
+        size_t pos = url.find(',');
+
+        if (pos == string::npos)
+        {
+            links.push_back(url);
+            break;
+        }
+
+        links.push_back(url.substr(0, pos));
+        url = url.substr(pos + 1);
+    }
+
+    mysql_free_result(result);
+
+    return links;
+}
+
+std::string PageStorage::getTitle(int id)
+{
+    std::string title;
+
+    const char *query = "SELECT title FROM pages WHERE id = ?";
+
+    MYSQL_STMT *stmt = mysql_stmt_init(conn);
+
+    if (stmt == nullptr)
+        return title;
+
+    if (mysql_stmt_prepare(stmt, query, strlen(query)))
+    {
+        mysql_stmt_close(stmt);
+        return title;
+    }
+
+    MYSQL_BIND param[1];
+    memset(param, 0, sizeof(param));
+
+    param[0].buffer_type = MYSQL_TYPE_LONG;
+    param[0].buffer = &id;
+
+    mysql_stmt_bind_param(stmt, param);
+
+    char buffer[1024];
+    unsigned long length;
+    bool isNull = false;
+
+    MYSQL_BIND result[1];
+    memset(result, 0, sizeof(result));
+
+    result[0].buffer_type = MYSQL_TYPE_STRING;
+    result[0].buffer = buffer;
+    result[0].buffer_length = sizeof(buffer);
+    result[0].length = &length;
+    result[0].is_null = &isNull;
+
+    mysql_stmt_bind_result(stmt, result);
+
+    if (mysql_stmt_execute(stmt) == 0 &&
+        mysql_stmt_fetch(stmt) == 0 &&
+        !isNull)
+    {
+        title.assign(buffer, length);
+    }
+
+    mysql_stmt_close(stmt);
+
+    return title;
+}
+
+std::string PageStorage::getAuthority(int id)
+{
+    std::string authority;
+
+    const char *query = "SELECT authority FROM pages WHERE id = ?";
+
+    MYSQL_STMT *stmt = mysql_stmt_init(conn);
+
+    if (stmt == nullptr)
+        return authority;
+
+    if (mysql_stmt_prepare(stmt, query, strlen(query)))
+    {
+        mysql_stmt_close(stmt);
+        return authority;
+    }
+
+    MYSQL_BIND param[1];
+    memset(param, 0, sizeof(param));
+
+    param[0].buffer_type = MYSQL_TYPE_LONG;
+    param[0].buffer = &id;
+
+    mysql_stmt_bind_param(stmt, param);
+
+    char buffer[1024];
+    unsigned long length;
+    bool isNull = false;
+
+    MYSQL_BIND result[1];
+    memset(result, 0, sizeof(result));
+
+    result[0].buffer_type = MYSQL_TYPE_STRING;
+    result[0].buffer = buffer;
+    result[0].buffer_length = sizeof(buffer);
+    result[0].length = &length;
+    result[0].is_null = &isNull;
+
+    mysql_stmt_bind_result(stmt, result);
+
+    if (mysql_stmt_execute(stmt) == 0 &&
+        mysql_stmt_fetch(stmt) == 0 &&
+        !isNull)
+    {
+        authority.assign(buffer, length);
+    }
+
+    mysql_stmt_close(stmt);
+
+    return authority;
 }

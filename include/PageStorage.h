@@ -1,14 +1,14 @@
 #pragma once
-
+#include "STL/DynamicArray.h"
 #include <string>
 #include <mysql.h>
 
 class PageStorage
 {
 private:
-    MYSQL *conn;
-    
-    public:
+
+public:
+MYSQL *conn;
     PageStorage();
     ~PageStorage();
     size_t duplicatePages=0;
@@ -16,6 +16,8 @@ private:
     // Pages Table
     bool storePage(std::string &url,
                    std::string &html,
+                   std::string &authority,
+                   std::string &title,
                    int depth,
                    int id);
 
@@ -26,6 +28,8 @@ private:
 
     std::string getHtml(std::string &url);
     std::string getHtml(int id);
+    std::string getTitle(int id);
+    std::string getAuthority(int id);
     int getMaxPageId();  
     std::string getUrl(int id);
 
@@ -57,4 +61,6 @@ private:
     bool putIndexer(const std::string &word,
                 int maxFrequency,
                 const std::string &url);
+    
+    DynamicArray<std::string> getIndexer(std::string &word);
 };

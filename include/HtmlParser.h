@@ -11,7 +11,7 @@ class HtmlParser{
     public:
     size_t parseHttp(const std::string &html, size_t start);
     size_t parseHref(const std::string &html, size_t start);
-    DynamicArray<std::string>parseLinks(const std::string &html);
+    DynamicArray<std::string>parseLinks(const std::string &html,std::string & title);
     std::string parseContent(const std::string& html);
 
 };

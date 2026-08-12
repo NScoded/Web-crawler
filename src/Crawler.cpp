@@ -76,7 +76,8 @@ void Crawler::loop(string seed,string seedHtml,int seedId){
         string link = frontier.getLink();
         int linkDepth = frontier.getDepth();
         normalizer.seedLink=link;
-
+        string title="";
+        string authority="";
         frontier.pop();
         if (frontier.empty()){
             if(pages.clearFrontier())cout<<"Frontier Empty\n";
@@ -91,9 +92,9 @@ void Crawler::loop(string seed,string seedHtml,int seedId){
                 cout << "Depth Reached!\n";
                 continue;
             }
-
-            normalizer.normalize(link);
-
+///////////////////////////////////////////////////////////////////////////
+            normalizer.normalize(link,authority);
+            cout<<"Authority: "<<authority<<endl;
             if (link.empty())
                 continue;
 
@@ -113,13 +114,16 @@ void Crawler::loop(string seed,string seedHtml,int seedId){
                 html = fetch.getHtml(link);
 
             visited.insert(link);
-
-            DynamicArray<string> links = htmlparser.parseLinks(html);
+/////////////////////////////////////////////////////////////////////////////////////
+            DynamicArray<string> links = htmlparser.parseLinks(html,title);
+            cout<<"Title: "<<title<<endl;
+            
             html=htmlparser.parseContent(html);
 
             for (int i = 0; i < links.size(); i++)
             {
-                normalizer.normalize(links[i]);
+                ///////////////////////////////////////////////////////////
+                normalizer.normalize(links[i],authority);
 
                 if (!links[i].empty() && !visited.exists(links[i]))
                 {
@@ -132,7 +136,7 @@ void Crawler::loop(string seed,string seedHtml,int seedId){
             if (linkDepth != 0)
             {
                 // Databse not stores duplicate pages
-                pages.storePage(link, html, linkDepth,seedId);
+                pages.storePage(link, html,authority,title, linkDepth,seedId);
             }
             
 
@@ -154,9 +158,6 @@ void Crawler::loop(string seed,string seedHtml,int seedId){
     cout<<"Total duplicate url in frontier : "<<duplicateFrontier<<endl;
     cout<<"Total pages fetch by curl : "<<fetch.curlURL<<endl;
     cout<<"Total pages fetch by CDP : "<<fetch.CDPURL<<endl;
-
-
-
 }
 
 int main(){

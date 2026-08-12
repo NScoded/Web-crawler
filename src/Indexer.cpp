@@ -16,6 +16,15 @@ Indexer::Indexer(){
     {
         stopword.insert(word);
     }
+
+    string title="404: NOT_FOUND,Error,403 Forbidden,Forbidden,HTTP Status 404 – Not Found, ERROR: The request could not be satisfied,Privacy error,Page Not Found,Access Denied | ART19,Error 400 (Bad Request)!!1";
+    std::stringstream st(title);
+    
+
+    while (getline(st, word, ','))
+    {
+        ignoreTitle.insert(word);
+    }
     
 }
 
@@ -34,18 +43,20 @@ void Indexer::buildIndex()
     {
         string html = storage.getHtml(id);
         string url = storage.getUrl(id);
+        string title = storage.getTitle(id);
+        string authority = storage.getAuthority(id);
 
-        if (html.empty())
-            continue;
+        if (html.empty())continue;
 
+        if(ignoreTitle.exists(title))continue;
         
         
 
-        countWords(html,url);
+        countWords(html,url,authority,title);
 
         //storeIndex(id, frequency);
 
-        std::cout << "Indexed Page : " << id << std::endl;
+        
     }
     
     DynamicArray<string>array=frequency.getkeys();
@@ -64,29 +75,25 @@ void Indexer::buildIndex()
     storeIndex();
 }
 
-std::string Indexer::normalizeWord(std::string& word)
-{
+std::string Indexer::normalizeWord(std::string& word){
     std::string normalized;
-
     for (char ch : word){
         unsigned char c = static_cast<unsigned char>(ch);
-
         // alphabets aur digits
         if (std::isalnum(c)){
             normalized += std::tolower(c);
         }
     }
-    
     if(stopword.exists(word))return "";
     //normalized = stemWord(normalized);
     return normalized;
 }
 
-void Indexer:: countWords(const std::string& html,string & link){
+void Indexer:: countWords(const std::string& html,string & link,string &auth,string &title){
      stringstream ss(html);
 
      HashMap<string,int>pageFrequency;
-
+    
      string word;
      while(ss>>word){
         word = normalizeWord(word);
@@ -94,18 +101,19 @@ void Indexer:: countWords(const std::string& html,string & link){
         if(pageFrequency.exists(word)){
             int size=pageFrequency.get(word);
             size++;
-            pageFrequency.insert(word,size);
+            pageFrequency.insert(word,size); 
             continue;
         }
         pageFrequency.insert(word,1);
     }
-
     DynamicArray<string>keys=pageFrequency.getkeys();
     for(int i=0;i<keys.size();i++){
         if(!frequency.exists(keys[i])){
             Url url;
             url.freq=pageFrequency.get(keys[i]);
             url.link=link;
+            url.auth=auth;
+            url.title=title;
             DynamicArray<Url>u;
             u.push_back(url);
             frequency.insert(keys[i],u);
@@ -118,28 +126,24 @@ void Indexer:: countWords(const std::string& html,string & link){
             Url greater;
             greater.freq=pagekey;
             greater.link=link;
+            greater.auth=auth;
+            greater.title=title;
 
             for(int j=0;j<rank.size();j++){
                 if(pagekey > rank[j].freq){
                     rank.insert(j,greater);
-                    if(rank.size()>5){
-                        rank.pop_back();
-                    }
                     inserted=true;
                     break;
                 }
 
             }
             if(!inserted){
-                if(rank.size()<5){
-                    rank.push_back(greater);
-                }
+                rank.push_back(greater);
             }
             frequency.insert(keys[i],rank);
         }
 
-    }
-    
+    }    
 }
 
 bool Indexer::endsWith(const std::string& word,
@@ -182,14 +186,14 @@ bool Indexer::isDoubleConsonant(const std::string& word)
     return a == b && !isVowel(a);
 }
 
+//stemmer
 std::string Indexer::stemWord(std::string word)
 {
     if(word.length() <= 2)
         return word;
 
     // studies -> study
-    if(endsWith(word,"ies") && word.length() > 4)
-    {
+    if(endsWith(word,"ies") && word.length() > 4){
         word.erase(word.length()-3);
         word += "y";
         return word;

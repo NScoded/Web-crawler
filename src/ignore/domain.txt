@@ -42,4 +42,5 @@ maps.google.com,
 bing.com,
 w3.org,
 leetcode.com,
-google.com
+google.com,
+ogp.me

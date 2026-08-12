@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search Engine</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="search-page" id="searchPage">
+    <section class="search-header" aria-label="Search">
+      <a class="brand" href="#" aria-label="Search Engine home">Search<span>Engine</span></a>
+      <form class="search-form" id="searchForm" role="search">
+      
+        <input id="searchInput" name="q" type="search" autocomplete="off"
+          placeholder="Search the web" autofocus />
+        <button class="search-button" type="submit">Search</button>
+      </form>
+    </section>
+
+    <section class="results-area" id="resultsArea" aria-live="polite">
+      <div class="welcome" id="welcome">
+        <h1>Search anything</h1>
+        <p>Enter one or more words to see alternating results for each word.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
