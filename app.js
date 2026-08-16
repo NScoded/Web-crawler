@@ -16,7 +16,9 @@ async function renderResults(query) {
 
   let results;
   try {
-    const response = await fetch(`http://127.0.0.1:8080/api/search?q=${encodeURIComponent(trimmedQuery)}`);
+    const response = await fetch(
+    `http://13.232.125.66:8081/api/search?q=${encodeURIComponent(trimmedQuery)}`
+);
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Search failed.');
     results = data.results;
