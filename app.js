@@ -17,7 +17,7 @@ async function renderResults(query) {
   let results;
   try {
     const response = await fetch(
-    `http://13.232.125.66:8081/api/search?q=${encodeURIComponent(trimmedQuery)}`
+    `https://backend.nileshsahu.me/search/api/search?q=${encodeURIComponent(trimmedQuery)}`
 );
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Search failed.');
